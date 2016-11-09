@@ -34,8 +34,8 @@ func main() {
 	}
 
 	fmt.Println("Looking up network by name: ", space)
-	network_name := fmt.Sprintf("%s", space)
-	networks, err = client.NetworksByName(network_name)
+	networkName := fmt.Sprintf("%s", space)
+	networks, err = client.NetworksByName(networkName)
 	die(err)
 
 	fmt.Printf("Found %d networks\n", len(networks))
@@ -43,9 +43,9 @@ func main() {
 	var networkID string
 	if len(networks) == 0 {
 		// create network
-		fmt.Printf("creating network: %s\n", network_name)
+		fmt.Printf("creating network: %s\n", networkName)
 		net := neutron.Network{
-			Name:         network_name,
+			Name:         networkName,
 			Description:  fmt.Sprintf("space: %s\n", space),
 			AdminStateUp: true,
 		}
@@ -57,15 +57,16 @@ func main() {
 
 	// find subnet
 	fmt.Println("Looking up subnet by name :", space)
-	subnets, err := client.SubnetsByName(network_name)
+	subnets, err := client.SubnetsByName(networkName)
 	die(err)
 
 	fmt.Printf("Found %d subnets\n", len(subnets))
 
 	if len(subnets) == 0 {
 		// create subnet
-		fmt.Printf("creating subnet: %s\n", network_name)
+		fmt.Printf("creating subnet: %s\n", networkName)
 		sn := neutron.Subnet{
+			Name:      networkName,
 			NetworkID: networkID,
 			IPVersion: 4,
 			CIDR:      "10.0.3.0/24",
