@@ -41,7 +41,8 @@ func main() {
 	fmt.Printf("Found %d networks\n", len(networks))
 
 	var networkID string
-	if len(networks) == 0 {
+	switch len(networks) {
+	case 0:
 		// create network
 		fmt.Printf("creating network: %s\n", networkName)
 		net := neutron.Network{
@@ -53,6 +54,10 @@ func main() {
 		die(err)
 		fmt.Printf("created network: %s\n", n.Name)
 		networkID = n.ID
+	case 1:
+		networkID = networks[0].ID
+	default:
+		die(fmt.Errorf("could not find network with name: %s", networkName))
 	}
 
 	// find subnet
@@ -82,11 +87,35 @@ func main() {
 		fmt.Printf("created subnet: %s for networkID: %s\n", s.CIDR, networkID)
 	}
 
-	// delete network
-	if networkID != "" {
-		err := client.DeleteNetwork(networkID)
+	// create port
+	port := neutron.Port{
+		NetworkID:    networkID,
+		Name:         "container-id-123",
+		DeviceID:     "d6b4d3a5-c700-476f-b609-1493dd9dadc0",
+		AdminStateUp: true,
+		// Status:       "UP",
+	}
+
+	p, err := client.CreatePort(port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("created port: %#v\n", p)
+
+	// delete port
+	cleanup := false
+	if cleanup {
+		err := client.DeletePort(p.ID)
 		die(err)
-		fmt.Printf("deleted network with networkID: %s\n", networkID)
+		fmt.Printf("deleted port with ID: %s\n", p.ID)
+
+		// delete network
+		if networkID != "" {
+			err := client.DeleteNetwork(networkID)
+			die(err)
+			fmt.Printf("deleted network with networkID: %s\n", networkID)
+		}
 	}
 
 }
