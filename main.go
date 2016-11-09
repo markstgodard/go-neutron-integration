@@ -82,6 +82,13 @@ func main() {
 		fmt.Printf("created subnet: %s for networkID: %s\n", s.CIDR, networkID)
 	}
 
+	// delete network
+	if networkID != "" {
+		err := client.DeleteNetwork(networkID)
+		die(err)
+		fmt.Printf("deleted network with networkID: %s\n", networkID)
+	}
+
 }
 
 func die(err error) {
