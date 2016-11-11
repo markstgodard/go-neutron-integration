@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -93,7 +94,6 @@ func main() {
 		Name:         "container-id-123",
 		DeviceID:     "d6b4d3a5-c700-476f-b609-1493dd9dadc0",
 		AdminStateUp: true,
-		// Status:       "UP",
 	}
 
 	p, err := client.CreatePort(port)
@@ -101,7 +101,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("created port: %#v\n", p)
+	pretty, err := json.Marshal(p)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("created port: %s\n", pretty)
 
 	// delete port
 	cleanup := false
