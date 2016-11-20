@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/markstgodard/go-keystone/keystone"
 	"github.com/markstgodard/go-neutron/neutron"
 )
 
@@ -14,15 +15,24 @@ func main() {
 
 	fmt.Printf("args: %v\n", os.Args)
 
-	url := os.Args[1]
-	token := os.Args[2]
+	neutronURL := os.Args[1]
+	keystoneURL := os.Args[2]
 	space := os.Args[3]
 
-	log.Printf("URL: %s\n", url)
-	log.Printf("token: %s\n", token)
+	log.Printf("Neutron: %s\n", neutronURL)
+	log.Printf("Keystone: %s\n", keystoneURL)
 	log.Printf("space: %s\n", space)
 
-	client, err := neutron.NewClient(url, token)
+	keystoneClient, err := keystone.NewClient(keystoneURL)
+	die(err)
+
+	// get token for username, password and domain name
+	auth := keystone.NewAuth("cf", "secret", "Default")
+	token, err := keystoneClient.Tokens(auth)
+	die(err)
+	log.Printf("token: %s\n", token)
+
+	client, err := neutron.NewClient(neutronURL, token)
 	die(err)
 
 	// get networks
